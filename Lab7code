@@ -1,0 +1,227 @@
+#include <iostream>
+using namespace std;
+
+
+class CDevice
+{
+private:
+	string Name;
+	int Size;
+	string* Content;
+public:
+	CDevice()
+	{
+		cout << endl;
+		cout << "Enter name" << endl;
+		cin >> this->Name;
+		cout << "Enter size" << endl;
+		cin >> this->Size;
+		Content = new string[Size];
+		int var = 0;
+		cout << "Do you want to fill the device?" << endl << "1 - Yes     2 - No" << endl;
+		cin >> var;
+		while(true)
+		{
+			if (var == 1)
+			{
+				for (int i = 0; i < Size; i++)
+				{
+					cout << "Enter next part" << endl;
+					cout << Size - i << " parts left" << endl;
+					cin >> Content[i];
+				}
+				break;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	virtual ~CDevice()
+	{
+		delete[] Content;
+	}
+
+	CDevice(CDevice &other)
+	{
+		this->Name = other.Name;
+		this->Size = other.Size;
+		this->Content = new string[Size];
+		for (int i = 0; i < Size; i++) { this->Content[i] = other.Content[i]; }
+	}
+
+	void operator= (CDevice &other)
+	{
+		this->Name = other.Name;
+		this->Size = other.Size;
+		for (int i = 0; i < Size; i++) { this->Content[i] = other.Content[i]; }
+	}
+
+	void PrintType() { cout << "Device" << endl; }
+
+	int GetSize() { return Size; }
+	string GetName() { return Name; }
+	string GetSomeContent(int i) { if (i >= Size) { return " "; } else { return Content[i]; } }
+
+	void SetName(string name) { this->Name = name; }
+	void SetSomeContent(string part, int i) { if (i >= Size) { return; } else { Content[i] = part; } }
+
+	virtual void GiveContent() { for (int i = 0; i < Size; i++) { cout << Content[i] << endl; } }
+	virtual void GiveContent(int j) { if (j >= Size) { return; } else { for (int i = 0; i < j; i++) { cout << Content[i] << endl; } } }
+
+	void IncreaceSize(int j)
+	{
+		Size = Size + j;
+		string* temp = new string[Size];
+		for (int i = 0; i < Size - 1; i++) { temp[i] = Content[i]; }
+		delete[] Content;
+		Content = new string[Size];
+		for (int i = 0; i < Size; i++) { Content[i] = temp[i]; }
+		delete[] temp;
+	}
+
+	virtual void PrintAllInfo()
+	{
+		cout << "Device info" << endl;
+		cout << "Name:" << GetName() << endl;
+		cout << "Size:" << GetSize() << endl;
+		for (int i = 0; i < GetSize(); i++) { cout << " " << i << " " << GetSomeContent(i) << endl; }
+		cout << endl;
+	}
+};
+
+class CBook : virtual public CDevice
+{
+private:
+	string TitleSheet;
+	int CurrentSheet = 0;
+public:
+	CBook()
+	{
+		cout << "Enter how look title sheet" << endl;
+		cin >> this->TitleSheet;
+	}
+
+	string GetTitleSheet() { return TitleSheet; }
+	int GetCurrentSheet() { return CurrentSheet; }
+
+	void SetTitleSheet(string TitleSheet) { this->TitleSheet = TitleSheet; }
+	void SetCurrentShet(int i) { this->CurrentSheet = i; }
+
+	void PrintType() { cout << "Book" << endl; }
+
+	void PrintAllInfo() override
+	{
+		cout << "Book info" << endl;
+		cout << "Name:" << GetName() << endl;
+		cout << "Size:" << GetSize() << endl;
+		cout << "Title Sheet:" << GetTitleSheet() << endl;
+		for (int i = 0; i < GetSize(); i++) { cout << " " << i << " " << GetSomeContent(i) << endl; }
+		cout << endl;
+	}
+
+	void ShowSheet(int i) { if (i >= GetSize()) { cout << "Wrong sheet" << endl; } else { cout << GetSomeContent(i) << endl; CurrentSheet = i;; } }
+	void ShowNextSheet() { CurrentSheet++; cout << GetSomeContent(CurrentSheet) << endl; }
+	void ShowPreviosSheet(){ CurrentSheet--; cout << GetSomeContent(CurrentSheet) << endl; }
+	void ShowAllShets() { cout << GetTitleSheet() << endl; for (int i = 0; i < GetSize(); i++) { cout << i << " " << GetSomeContent(i) << endl; } }
+};
+
+class CAudioBook : virtual public CDevice
+{
+private:
+	int LenInTime;
+	int CurrentMoment = 0;
+public:
+	CAudioBook()
+	{
+		cout << "How long it play?(In seconds)" << endl;
+		cin >> this->LenInTime;
+	}
+
+	int GetLenInTime() { return LenInTime; }
+	int GetCurrentMoment() { return CurrentMoment; }
+
+	void SetLenInTime(int i) { this->LenInTime = i; }
+	void SetCurrentMoment(int i) { this->CurrentMoment = i; }
+
+	void PrintType() { cout << "AudioBook" << endl; }
+
+	void PrintAllInfo() override
+	{
+		cout << "Audio book info" << endl;
+		cout << "Name:" << GetName() << endl;
+		cout << "Size:" << GetSize() << endl;
+		cout << "Length:" << GetLenInTime() << endl;
+		for (int i = 0; i < GetSize(); i++) { cout << " " << i << " " << GetSomeContent(i) << endl; }
+		cout << endl;
+	}
+
+	void StartPlayingFromBeginning() 
+	{ cout << "Audiobook start playing" << endl; 
+	    for (int i = 0; i < GetSize(); i++) 
+	    { cout << "Sound:" << GetSomeContent(i) << endl; SetCurrentMoment(i); } 
+		StopPlaying();
+	}
+	void StartPlayingFromLastMoment() 
+	{ cout << "Audiobook start playing" << endl; 
+	    for (int i = GetCurrentMoment(); i < GetSize(); i++) 
+		{ cout << "Sound:" << GetSomeContent(i) << endl; SetCurrentMoment(i); } 
+		StopPlaying();
+	}
+	void StopPlaying() { cout << "Audiobook stoped" << endl; }
+};
+
+class CEBook : public CBook, public CAudioBook
+{
+private:
+	string Tag;
+public:
+
+	CEBook()
+	{
+		cout << "Enter tag" << endl;
+		cin >> this->Tag;
+	}
+
+	string GetTag() { return Tag; }
+
+	void SetTag(string Tag) { this->Tag = Tag; }
+
+	void PrintType() { cout << "EBook" << endl; }
+
+	void PrintAllInfo() override
+	{
+		cout << "EBook info" << endl;
+		cout <<"Name:"<< GetName() << endl;
+		cout <<"Tag:"<< GetTag() << endl;
+		cout <<"Size:"<< GetSize() << endl;
+		cout <<"Title Sheet:"<< GetTitleSheet() << endl;
+		cout <<"Length:"<< GetLenInTime() << endl;
+		for (int i = 0; i < GetSize(); i++) { cout << " " << i << " " << GetSomeContent(i) << endl; }
+		cout << endl;
+	}
+};
+
+int main()
+{
+	
+	
+	CDevice* Devs1 = new CEBook;
+	CDevice* Devs2 = new CAudioBook;
+
+	cout << "Overload" << endl << endl;
+
+	Devs1->PrintType();
+	Devs2->PrintType();
+
+	cout << "Virtual" << endl << endl;
+	
+	Devs1->PrintAllInfo();
+	Devs2->PrintAllInfo();
+
+	delete Devs1;
+	delete Devs2;
+	return 0;
+}
